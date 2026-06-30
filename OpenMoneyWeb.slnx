@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="OpenMoneyWeb.Api/OpenMoneyWeb.Api.csproj" />
+  <Project Path="OpenMoneyWeb.Core/OpenMoneyWeb.Core.csproj" />
+  <Project Path="OpenMoneyWeb.Data/OpenMoneyWeb.Data.csproj" />
+</Solution>

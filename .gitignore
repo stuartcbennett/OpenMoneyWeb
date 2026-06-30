@@ -1,0 +1,27 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.nupkg
+*.snupkg
+
+# ASP.NET Core
+appsettings.*.json
+!appsettings.Development.json
+
+# Node / React
+OpenMoneyWeb.Client/node_modules/
+OpenMoneyWeb.Client/dist/
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
