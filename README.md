@@ -121,6 +121,20 @@ gcloud run deploy openmoneyweb \
 
 ---
 
+## Testing
+
+| Project | Tests | Approach |
+|---|---|---|
+| `OpenMoneyWeb.Core.Tests` | 14 tests | Pure unit tests, no mocks — exercises `ReturnCalculator` and `TransactionImporter` directly |
+| `OpenMoneyWeb.Data.Tests` | 13 tests | Integration tests against SQLite in-memory — covers repository CRUD, `GetLatestPrices`, and silent no-ops on missing ids |
+| `OpenMoneyWeb.Api.Tests` | 23 tests | Full HTTP integration tests via `WebApplicationFactory` with SQLite replacing MySQL — covers controllers, services, and end-to-end import/portfolio/reports flows |
+
+```bash
+dotnet test OpenMoneyWeb.slnx
+```
+
+---
+
 ## API reference
 
 | Method | Route | Description |
