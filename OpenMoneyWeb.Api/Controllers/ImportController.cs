@@ -33,6 +33,12 @@ public class ImportController : ControllerBase
         if (result.Transactions.Any())
             await _transactions.AddRangeAsync(result.Transactions);
 
-        return Ok(new ImportResultDto(result.Transactions.Count, result.Errors, result.NewInvestments));
+        var resultDto = new ImportResultDto(result.Transactions.Count, result.Errors, result.NewInvestments);
+
+        if (result.Errors.Any() && !result.Transactions.Any())
+            return UnprocessableEntity(resultDto);
+        if (result.Errors.Any())
+            return StatusCode(207, resultDto);
+        return Ok(resultDto);
     }
 }

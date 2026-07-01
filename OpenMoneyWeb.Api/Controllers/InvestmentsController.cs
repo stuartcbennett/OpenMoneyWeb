@@ -26,11 +26,13 @@ public class InvestmentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<InvestmentDto>> Create(CreateInvestmentDto dto)
     {
+        if (!Enum.TryParse<InvestmentType>(dto.Type, out var type))
+            return BadRequest($"Invalid investment type: {dto.Type}");
         var inv = new Investment
         {
             Name = dto.Name,
             Ticker = dto.Ticker,
-            Type = Enum.Parse<InvestmentType>(dto.Type),
+            Type = type,
             InitialPrice = dto.InitialPrice
         };
         await _repo.AddAsync(inv);
@@ -40,11 +42,13 @@ public class InvestmentsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, CreateInvestmentDto dto)
     {
+        if (!Enum.TryParse<InvestmentType>(dto.Type, out var type))
+            return BadRequest($"Invalid investment type: {dto.Type}");
         var inv = await _repo.GetByIdAsync(id);
         if (inv is null) return NotFound();
         inv.Name = dto.Name;
         inv.Ticker = dto.Ticker;
-        inv.Type = Enum.Parse<InvestmentType>(dto.Type);
+        inv.Type = type;
         inv.InitialPrice = dto.InitialPrice;
         await _repo.UpdateAsync(inv);
         return NoContent();

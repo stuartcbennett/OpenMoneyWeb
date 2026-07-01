@@ -1,5 +1,8 @@
 <Solution>
   <Project Path="OpenMoneyWeb.Api/OpenMoneyWeb.Api.csproj" />
+  <Project Path="OpenMoneyWeb.Api.Tests/OpenMoneyWeb.Api.Tests.csproj" />
   <Project Path="OpenMoneyWeb.Core/OpenMoneyWeb.Core.csproj" />
+  <Project Path="OpenMoneyWeb.Core.Tests/OpenMoneyWeb.Core.Tests.csproj" />
   <Project Path="OpenMoneyWeb.Data/OpenMoneyWeb.Data.csproj" />
+  <Project Path="OpenMoneyWeb.Data.Tests/OpenMoneyWeb.Data.Tests.csproj" />
 </Solution>

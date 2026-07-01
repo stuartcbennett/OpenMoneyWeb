@@ -36,9 +36,10 @@ builder.Services.AddCors(opts =>
 
 var app = builder.Build();
 
-// Auto-apply migrations on startup
-using (var scope = app.Services.CreateScope())
+// Auto-apply migrations on startup (skipped in Testing environment)
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
@@ -51,3 +52,5 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");    // SPA client-side routing fallback
 
 app.Run();
+
+public partial class Program { }

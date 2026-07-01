@@ -15,6 +15,9 @@ public class TransactionRepository
            .OrderByDescending(t => t.Date)
            .ToListAsync();
 
+    public async Task<Transaction?> GetByIdAsync(int id) =>
+        await _db.Transactions.FindAsync(id);
+
     public Task<List<Transaction>> GetAllAsync() =>
         _db.Transactions
            .Include(t => t.Account)

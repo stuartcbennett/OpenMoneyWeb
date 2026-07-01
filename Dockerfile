@@ -10,7 +10,7 @@ RUN npm run build
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS api-build
 WORKDIR /src
 # Copy project files first so package restore is cached independently of source changes
-COPY OpenMoneyWeb.sln ./
+COPY OpenMoneyWeb.slnx ./
 COPY OpenMoneyWeb.Core/OpenMoneyWeb.Core.csproj OpenMoneyWeb.Core/
 COPY OpenMoneyWeb.Data/OpenMoneyWeb.Data.csproj OpenMoneyWeb.Data/
 COPY OpenMoneyWeb.Api/OpenMoneyWeb.Api.csproj   OpenMoneyWeb.Api/

@@ -15,13 +15,15 @@ public class TransactionsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TransactionDto>> Create(CreateTransactionDto dto, [FromServices] InvestmentRepository invRepo)
     {
+        if (!Enum.TryParse<ActivityType>(dto.Activity, out var activity))
+            return BadRequest($"Invalid activity type: {dto.Activity}");
         var inv = await invRepo.GetByIdAsync(dto.InvestmentId);
         var tx = new Transaction
         {
             AccountId    = dto.AccountId,
             InvestmentId = dto.InvestmentId,
             Date         = dto.Date,
-            Activity     = Enum.Parse<ActivityType>(dto.Activity),
+            Activity     = activity,
             Quantity     = dto.Quantity,
             Price        = dto.Price,
             Total        = dto.Total,
@@ -36,13 +38,14 @@ public class TransactionsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, CreateTransactionDto dto)
     {
-        var all = await _repo.GetAllAsync();
-        var tx = all.FirstOrDefault(t => t.Id == id);
+        if (!Enum.TryParse<ActivityType>(dto.Activity, out var activity))
+            return BadRequest($"Invalid activity type: {dto.Activity}");
+        var tx = await _repo.GetByIdAsync(id);
         if (tx is null) return NotFound();
         tx.AccountId    = dto.AccountId;
         tx.InvestmentId = dto.InvestmentId;
         tx.Date         = dto.Date;
-        tx.Activity     = Enum.Parse<ActivityType>(dto.Activity);
+        tx.Activity     = activity;
         tx.Quantity     = dto.Quantity;
         tx.Price        = dto.Price;
         tx.Total        = dto.Total;
