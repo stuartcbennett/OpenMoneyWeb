@@ -76,8 +76,16 @@ public class ReportsService
 
     public async Task<List<PriceHistoryDto>> GetInvestmentPriceHistoryAsync(int investmentId)
     {
-        var history = await _investments.GetPriceHistoryAsync(investmentId);
-        return history.Select(p => new PriceHistoryDto(p.Id, p.InvestmentId, p.Date, p.Price)).ToList();
+        // Combine manual PriceHistory entries with prices recorded on transactions —
+        // most investments only ever get a price via imported/entered transactions.
+        var manualHistory = await _investments.GetPriceHistoryAsync(investmentId);
+        var txHistory = await _transactions.GetByInvestmentAsync(investmentId);
+
+        return manualHistory
+            .Select(p => new PriceHistoryDto(p.Id, p.InvestmentId, p.Date, p.Price))
+            .Concat(txHistory.Where(t => t.Price > 0).Select(t => new PriceHistoryDto(0, investmentId, t.Date, t.Price)))
+            .OrderBy(p => p.Date)
+            .ToList();
     }
 
     public async Task<List<InvestmentPerformanceDto>> GetInvestmentPerformanceAsync()

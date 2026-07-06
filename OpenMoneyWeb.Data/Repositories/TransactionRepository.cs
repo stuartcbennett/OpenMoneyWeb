@@ -18,6 +18,13 @@ public class TransactionRepository
     public async Task<Transaction?> GetByIdAsync(int id) =>
         await _db.Transactions.FindAsync(id);
 
+    public Task<List<Transaction>> GetByInvestmentAsync(int investmentId) =>
+        _db.Transactions
+           .Include(t => t.Account)
+           .Where(t => t.InvestmentId == investmentId)
+           .OrderByDescending(t => t.Date)
+           .ToListAsync();
+
     public Task<List<Transaction>> GetAllAsync() =>
         _db.Transactions
            .Include(t => t.Account)

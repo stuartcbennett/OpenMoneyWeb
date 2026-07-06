@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using OpenMoneyWeb.Core.Models;
 
 namespace OpenMoneyWeb.Core.Services;
@@ -62,7 +63,8 @@ public static class TransactionImporter
     {
         try
         {
-            var fields = line.Split(',');
+            //Format: Date,Investment,Activity,Quantity,Price,Commission,Total
+            var fields = SplitCsvLine(line);
             if (fields.Length < 5) return null;
 
             if (!DateTime.TryParse(fields[0].Trim(), out var date)) return null;
@@ -70,18 +72,17 @@ public static class TransactionImporter
             string investmentName = fields[1].Trim();
             string activityStr    = fields[2].Trim();
 
-            if (!decimal.TryParse(fields[3].Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out var qty))
+            if (!TryParseDecimal(fields[3], out var qty))
                 return null;
 
-            string priceStr = fields[4].Trim().TrimStart('$');
-            if (!decimal.TryParse(priceStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
+            if (!TryParseDecimal(fields[4], out var price))
                 return null;
 
+            // fields[5] is commission (may be empty) — skip it
             decimal total = 0;
             if (fields.Length >= 7)
             {
-                string totalStr = fields[6].Trim().TrimStart('$');
-                decimal.TryParse(totalStr, NumberStyles.Any, CultureInfo.InvariantCulture, out total);
+                TryParseDecimal(fields[6], out total);
             }
 
             if (total == 0 && qty != 0 && price != 0) total = qty * price;
@@ -125,5 +126,50 @@ public static class TransactionImporter
             result.Errors.Add($"Parse error: {ex.Message} — line: {line}");
             return null;
         }
+    }
+
+    private static string[] SplitCsvLine(string line)
+    {
+        var fields = new List<string>();
+        var current = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    current.Append('"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+
+                continue;
+            }
+
+            if (c == ',' && !inQuotes)
+            {
+                fields.Add(current.ToString().Trim());
+                current.Clear();
+                continue;
+            }
+
+            current.Append(c);
+        }
+
+        fields.Add(current.ToString().Trim());
+        return fields.ToArray();
+    }
+
+    private static bool TryParseDecimal(string value, out decimal result)
+    {
+        var normalized = value.Trim().Trim('"').TrimStart('$');
+        normalized = normalized.Replace(",", string.Empty);
+        return decimal.TryParse(normalized, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
     }
 }
