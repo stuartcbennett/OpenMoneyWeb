@@ -3,13 +3,11 @@ steps:
     args:
       - build
       - -t
-      - gcr.io/$PROJECT_ID/openmoneyweb:$COMMIT_SHA
-      - -t
       - gcr.io/$PROJECT_ID/openmoneyweb:latest
       - .
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/openmoneyweb']
+    args: ['push', 'gcr.io/$PROJECT_ID/openmoneyweb:latest']
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -17,7 +15,7 @@ steps:
       - run
       - deploy
       - openmoneyweb
-      - --image=gcr.io/$PROJECT_ID/openmoneyweb:$COMMIT_SHA
+      - --image=gcr.io/$PROJECT_ID/openmoneyweb:latest
       - --region=northamerica-northeast1
       - --platform=managed
       - --allow-unauthenticated

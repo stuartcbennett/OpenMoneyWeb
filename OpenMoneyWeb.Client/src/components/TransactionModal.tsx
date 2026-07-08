@@ -14,13 +14,13 @@ interface Props {
   onSaved: () => void
 }
 
-const ACTIVITIES = ['Buy', 'Sell', 'ReinvestDividend', 'ReinvestInterest']
+const ACTIVITIES: Transaction['activity'][] = ['Buy', 'Sell', 'ReinvestDividend', 'ReinvestInterest']
 
 export default function TransactionModal({ open, tx, accountId, onClose, onSaved }: Props) {
   const [investments, setInvestments] = useState<Investment[]>([])
   const [investmentId, setInvestmentId] = useState<number | ''>('')
   const [date, setDate] = useState('')
-  const [activity, setActivity] = useState('Buy')
+  const [activity, setActivity] = useState<Transaction['activity']>('Buy')
   const [quantity, setQuantity] = useState('')
   const [price, setPrice] = useState('')
   const [total, setTotal] = useState('')
@@ -76,7 +76,7 @@ export default function TransactionModal({ open, tx, accountId, onClose, onSaved
           </FormControl>
           <FormControl fullWidth>
             <InputLabel>Activity</InputLabel>
-            <Select value={activity} label="Activity" onChange={e => setActivity(e.target.value)}>
+            <Select value={activity} label="Activity" onChange={e => setActivity(e.target.value as Transaction['activity'])}>
               {ACTIVITIES.map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
             </Select>
           </FormControl>
