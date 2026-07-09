@@ -100,18 +100,18 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com
 gcloud builds submit --config cloudbuild.yaml
 ```
 
-Cloud Build builds the image, pushes it to Container Registry, and deploys to Cloud Run. The connection string is injected from Secret Manager at deploy time.
+Cloud Build builds the image, pushes it to Artifact Registry, and deploys to Cloud Run. The connection string is injected from Secret Manager at deploy time.
 
 ### Manual deploy (skip Cloud Build)
 
 ```bash
 # Build and push the image
-docker build -t gcr.io/PROJECT_ID/openmoneyweb .
-docker push gcr.io/PROJECT_ID/openmoneyweb
+docker build -t northamerica-northeast1-docker.pkg.dev/PROJECT_ID/openmoneyweb/openmoneyweb .
+docker push northamerica-northeast1-docker.pkg.dev/PROJECT_ID/openmoneyweb/openmoneyweb
 
 # Deploy to Cloud Run
 gcloud run deploy openmoneyweb \
-  --image gcr.io/PROJECT_ID/openmoneyweb \
+  --image northamerica-northeast1-docker.pkg.dev/PROJECT_ID/openmoneyweb/openmoneyweb \
   --region northamerica-northeast1 \
   --platform managed \
   --allow-unauthenticated \

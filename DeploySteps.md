@@ -15,7 +15,7 @@ In the Console go to **APIs & Services → Enable APIs** and enable these (or ru
 
 - Cloud Run API
 - Cloud Build API
-- Container Registry API
+- Artifact Registry API
 - Cloud SQL Admin API
 - Secret Manager API
 
@@ -32,7 +32,13 @@ gcloud init
 gcloud config set project YOUR_PROJECT_ID
 
 # Enable all required APIs at once
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com containerregistry.googleapis.com sqladmin.googleapis.com secretmanager.googleapis.com
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com sqladmin.googleapis.com secretmanager.googleapis.com
+
+# Create the Artifact Registry repo that cloudbuild.yaml pushes images to
+# (unlike the old Container Registry, this isn't created automatically on first push)
+gcloud artifacts repositories create openmoneyweb `
+  --repository-format=docker `
+  --location=northamerica-northeast1
 ```
 
 ---
@@ -77,7 +83,7 @@ Replace the two placeholder values in `cloudrun.yaml`:
 
 ```yaml
 run.googleapis.com/cloudsql-instances: YOUR_PROJECT_ID:northamerica-northeast1:openmoney-db
-image: gcr.io/YOUR_PROJECT_ID/openmoneyweb:latest
+image: northamerica-northeast1-docker.pkg.dev/YOUR_PROJECT_ID/openmoneyweb/openmoneyweb:latest
 ```
 
 ---
@@ -113,7 +119,7 @@ Your app uses EF Core, so migrations need to run once after first deploy. The ea
 
 ```powershell
 gcloud run jobs create migrate-db `
-  --image=gcr.io/YOUR_PROJECT_ID/openmoneyweb:latest `
+  --image=northamerica-northeast1-docker.pkg.dev/YOUR_PROJECT_ID/openmoneyweb/openmoneyweb:latest `
   --region=northamerica-northeast1 `
   --set-cloudsql-instances=YOUR_PROJECT_ID:northamerica-northeast1:openmoney-db `
   --set-secrets=ConnectionStrings__DefaultConnection=db-connection-string:latest `
@@ -155,7 +161,7 @@ gcloud run services describe openmoneyweb --region=northamerica-northeast1 --for
 |---|---|---|
 | Cloud Run | 2M requests/month | ~$0.40/million |
 | Cloud SQL `db-f1-micro` | None | ~$7/month |
-| Container Registry | 0.5 GB | $0.10/GB |
+| Artifact Registry | 0.5 GB | $0.10/GB |
 
 The biggest ongoing cost will be Cloud SQL. Stop the instance when not in use to save money:
 
