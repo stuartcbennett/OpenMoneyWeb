@@ -22,7 +22,8 @@ public class ReportsService
         if (!allTransactions.Any()) return [];
 
         var allPriceHistory = await _investments.GetAllPriceHistoryAsync();
-        return BuildValueSeries(allTransactions, allPriceHistory, allTransactions.Min(t => t.Date), DateTime.Today);
+        var combinedPrices = CombineWithTransactionPrices(allPriceHistory, allTransactions);
+        return BuildValueSeries(allTransactions, combinedPrices, allTransactions.Min(t => t.Date), DateTime.Today);
     }
 
     public async Task<List<NetWorthPointDto>> GetAccountValueOverTimeAsync(int accountId)
@@ -33,8 +34,22 @@ public class ReportsService
         var priceHistory = await _investments.GetAllPriceHistoryAsync();
         var relevantInvestmentIds = txs.Select(t => t.InvestmentId).ToHashSet();
         var relevantPrices = priceHistory.Where(p => relevantInvestmentIds.Contains(p.InvestmentId)).ToList();
+        var combinedPrices = CombineWithTransactionPrices(relevantPrices, txs);
 
-        return BuildValueSeries(txs, relevantPrices, txs.Min(t => t.Date), DateTime.Today);
+        return BuildValueSeries(txs, combinedPrices, txs.Min(t => t.Date), DateTime.Today);
+    }
+
+    // Most investments only ever get a price via imported/entered transactions,
+    // rather than a manually recorded PriceHistory entry — see GetInvestmentPriceHistoryAsync.
+    private static List<PriceHistory> CombineWithTransactionPrices(
+        IReadOnlyList<PriceHistory> priceHistory,
+        IReadOnlyList<Transaction> transactions)
+    {
+        var fromTransactions = transactions
+            .Where(t => t.Price > 0)
+            .Select(t => new PriceHistory { InvestmentId = t.InvestmentId, Date = t.Date, Price = t.Price });
+
+        return priceHistory.Concat(fromTransactions).ToList();
     }
 
     private static List<NetWorthPointDto> BuildValueSeries(
