@@ -113,37 +113,20 @@ This runs the existing `cloudbuild.yaml` which handles everything automatically.
 
 ---
 
-## Phase 9 — Run Database Migrations
+## Phase 9 — Database Migrations
 
-Your app uses EF Core, so migrations need to run once after first deploy. The easiest way is a one-off Cloud Run job:
-
-```powershell
-gcloud run jobs create migrate-db `
-  --image=northamerica-northeast1-docker.pkg.dev/YOUR_PROJECT_ID/openmoneyweb/openmoneyweb:latest `
-  --region=northamerica-northeast1 `
-  --set-cloudsql-instances=YOUR_PROJECT_ID:northamerica-northeast1:openmoney-db `
-  --set-secrets=ConnectionStrings__DefaultConnection=db-connection-string:latest `
-  --command="dotnet" `
-  --args="OpenMoneyWeb.Api.dll,--migrate"
-
-gcloud run jobs execute migrate-db --region=northamerica-northeast1
-```
-
-> **Note:** This requires the app to support a `--migrate` CLI argument to run `dbContext.Database.Migrate()` and exit. See Phase 9a below.
-
-### Phase 9a — Add migration support to the API
-
-In `Program.cs`, add before `app.Run()`:
+No manual step needed — `Program.cs` applies pending EF Core migrations automatically on startup (skipped only in the `Testing` environment), so every deploy in Phase 8 brings the schema up to date as the new revision starts:
 
 ```csharp
-if (args.Contains("--migrate"))
+if (!app.Environment.IsEnvironment("Testing"))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
-    return;
 }
 ```
+
+Just make sure any new migration (`dotnet ef migrations add <Name> --project OpenMoneyWeb.Data --startup-project OpenMoneyWeb.Api`) is committed before you build & deploy.
 
 ---
 
